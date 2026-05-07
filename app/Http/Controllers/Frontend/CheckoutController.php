@@ -136,10 +136,7 @@ class CheckoutController extends Controller
             $api->utility->verifyPaymentSignature($attributes);
             
             $order = \App\Models\Order::findOrFail($request->order_id);
-            $order->update([
-                'payment_status' => 'paid',
-                'status' => 'processing'
-            ]);
+            app(\App\Services\OrderService::class)->updateStatus($order, 'paid');
 
             return redirect()->route('orders.show', $order->order_number)->with('success', 'Payment successful!');
         } catch (\Razorpay\Api\Errors\SignatureVerificationError $e) {
@@ -148,7 +145,7 @@ class CheckoutController extends Controller
             // Restore cart
             $cartService = app(\App\Services\CartService::class);
             foreach($order->items as $item) {
-                $cartService->addToCart($item->product_variant_id, $item->quantity);
+                $cartService->addItem($item->product_variant_id, $item->quantity);
             }
             app(\App\Services\OrderService::class)->updateStatus($order, 'cancelled');
 
@@ -164,7 +161,7 @@ class CheckoutController extends Controller
             // Restore cart
             $cartService = app(\App\Services\CartService::class);
             foreach($order->items as $item) {
-                $cartService->addToCart($item->product_variant_id, $item->quantity);
+                $cartService->addItem($item->product_variant_id, $item->quantity);
             }
             return redirect()->route('checkout.index')->with('error', 'Payment was cancelled. You can try again.');
         }

@@ -22,6 +22,10 @@ class ProductImage extends Model
 
     public function getUrlAttribute(): string
     {
-        return asset('storage/' . $this->image_path);
+        // R2 images are stored as full URLs; local images as relative paths.
+        if (str_starts_with($this->image_path, 'http://') || str_starts_with($this->image_path, 'https://')) {
+            return $this->image_path;
+        }
+        return \Illuminate\Support\Facades\Storage::disk('public')->url($this->image_path);
     }
 }

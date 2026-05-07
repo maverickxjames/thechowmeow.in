@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Route;
 | Public Frontend Routes
 |--------------------------------------------------------------------------
 */
-Route::middleware('share.menu')->group(function () {
+Route::middleware(['share.menu', 'maintenance'])->group(function () {
     Route::get('/', [Frontend\HomeController::class, 'index'])->name('home');
 
     // Products
@@ -65,17 +65,25 @@ Route::prefix('admin')
 
         // Products
         Route::get('products/export', [Admin\ProductController::class, 'export'])->name('products.export');
+        Route::delete('products/bulk-destroy', [Admin\ProductController::class, 'bulkDestroy'])->name('products.bulk-destroy');
         Route::resource('products', Admin\ProductController::class);
         Route::post('products/{product}/variants', [Admin\ProductController::class, 'storeVariant'])->name('products.variants.store');
         Route::put('variants/{variant}', [Admin\ProductController::class, 'updateVariant'])->name('variants.update');
         Route::delete('variants/{variant}', [Admin\ProductController::class, 'destroyVariant'])->name('variants.destroy');
         Route::delete('products/{product}/images', [Admin\ProductController::class, 'destroyImage'])->name('products.images.destroy');
 
+        // Product Import
+        Route::get('import', [Admin\ImportController::class, 'index'])->name('import.index');
+        Route::post('import/preview', [Admin\ImportController::class, 'preview'])->name('import.preview');
+        Route::post('import/execute', [Admin\ImportController::class, 'import'])->name('import.execute');
+        Route::get('import/template', [Admin\ImportController::class, 'template'])->name('import.template');
+
         // Orders
         Route::get('orders/export', [Admin\OrderController::class, 'export'])->name('orders.export');
         Route::get('orders', [Admin\OrderController::class, 'index'])->name('orders.index');
         Route::get('orders/{order}', [Admin\OrderController::class, 'show'])->name('orders.show');
         Route::put('orders/{order}/status', [Admin\OrderController::class, 'updateStatus'])->name('orders.status');
+        Route::put('orders/{order}/shipping', [Admin\OrderController::class, 'updateShipping'])->name('orders.shipping');
 
         // Menus
         Route::get('menus', [Admin\MenuController::class, 'index'])->name('menus.index');

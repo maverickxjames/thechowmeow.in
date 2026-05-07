@@ -79,4 +79,15 @@ class OrderController extends Controller
             return back()->with('error', $e->getMessage());
         }
     }
+    public function updateShipping(Request $request, Order $order)
+    {
+        $request->validate([
+            'shipping_provider' => 'nullable|string|max:255',
+            'tracking_id' => 'nullable|string|max:255',
+        ]);
+
+        $order->update($request->only(['shipping_provider', 'tracking_id']));
+
+        return back()->with('success', 'Shipping information updated successfully.');
+    }
 }

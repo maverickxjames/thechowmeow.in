@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'PetWear — Premium Pet Clothing')</title>
+    <title>@yield('title', config('app.name', 'PetWear') . ' — Premium Pet Clothing')</title>
     <meta name="description" content="@yield('meta_description', 'Shop premium clothing for dogs and cats. Casual wear, festive outfits, accessories and more.')">
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=inter:300,400,500,600,700,800&display=swap" rel="stylesheet">
@@ -25,14 +25,18 @@
 
                 {{-- Logo --}}
                 <a href="{{ route('home') }}" class="flex items-center gap-2.5 shrink-0">
-                    <svg class="w-7 h-7 text-violet-700" viewBox="0 0 100 100" fill="currentColor">
-                        <ellipse cx="50" cy="68" rx="22" ry="18"/>
-                        <ellipse cx="28" cy="44" rx="10" ry="12" transform="rotate(-15 28 44)"/>
-                        <ellipse cx="72" cy="44" rx="10" ry="12" transform="rotate(15 72 44)"/>
-                        <ellipse cx="38" cy="28" rx="9" ry="11" transform="rotate(-10 38 28)"/>
-                        <ellipse cx="62" cy="28" rx="9" ry="11" transform="rotate(10 62 28)"/>
-                    </svg>
-                    <span class="text-xl font-bold text-gray-900 tracking-tight">PetWear</span>
+                    @if(config('app.logo'))
+                        <img src="{{ Storage::url(config('app.logo')) }}" alt="Logo" class="h-8 w-auto object-contain">
+                    @else
+                        <svg class="w-7 h-7 text-violet-700" viewBox="0 0 100 100" fill="currentColor">
+                            <ellipse cx="50" cy="68" rx="22" ry="18"/>
+                            <ellipse cx="28" cy="44" rx="10" ry="12" transform="rotate(-15 28 44)"/>
+                            <ellipse cx="72" cy="44" rx="10" ry="12" transform="rotate(15 72 44)"/>
+                            <ellipse cx="38" cy="28" rx="9" ry="11" transform="rotate(-10 38 28)"/>
+                            <ellipse cx="62" cy="28" rx="9" ry="11" transform="rotate(10 62 28)"/>
+                        </svg>
+                    @endif
+                    <span class="text-xl font-bold text-gray-900 tracking-tight">{{ config('app.name', 'PetWear') }}</span>
                 </a>
 
                 {{-- Desktop Menu --}}
@@ -278,14 +282,18 @@
                 {{-- Brand --}}
                 <div class="lg:col-span-1">
                     <div class="flex items-center gap-2.5 mb-5">
-                        <svg class="w-6 h-6 text-violet-400" viewBox="0 0 100 100" fill="currentColor">
-                            <ellipse cx="50" cy="68" rx="22" ry="18"/>
-                            <ellipse cx="28" cy="44" rx="10" ry="12" transform="rotate(-15 28 44)"/>
-                            <ellipse cx="72" cy="44" rx="10" ry="12" transform="rotate(15 72 44)"/>
-                            <ellipse cx="38" cy="28" rx="9" ry="11" transform="rotate(-10 38 28)"/>
-                            <ellipse cx="62" cy="28" rx="9" ry="11" transform="rotate(10 62 28)"/>
-                        </svg>
-                        <span class="text-lg font-bold text-white">PetWear</span>
+                        @if(config('app.logo'))
+                            <img src="{{ Storage::url(config('app.logo')) }}" alt="Logo" class="h-6 w-auto object-contain brightness-0 invert opacity-90">
+                        @else
+                            <svg class="w-6 h-6 text-violet-400" viewBox="0 0 100 100" fill="currentColor">
+                                <ellipse cx="50" cy="68" rx="22" ry="18"/>
+                                <ellipse cx="28" cy="44" rx="10" ry="12" transform="rotate(-15 28 44)"/>
+                                <ellipse cx="72" cy="44" rx="10" ry="12" transform="rotate(15 72 44)"/>
+                                <ellipse cx="38" cy="28" rx="9" ry="11" transform="rotate(-10 38 28)"/>
+                                <ellipse cx="62" cy="28" rx="9" ry="11" transform="rotate(10 62 28)"/>
+                            </svg>
+                        @endif
+                        <span class="text-lg font-bold text-white">{{ config('app.name', 'PetWear') }}</span>
                     </div>
                     <p class="text-sm leading-relaxed text-gray-500">Premium clothing for your beloved pets. Thoughtfully designed for comfort and style.</p>
                 </div>
@@ -334,7 +342,7 @@
             </div>
 
             <div class="border-t border-gray-800/70 mt-12 pt-8 flex flex-col sm:flex-row justify-between items-center gap-3">
-                <p class="text-xs text-gray-600">&copy; {{ date('Y') }} PetWear. All rights reserved.</p>
+                <p class="text-xs text-gray-600">&copy; {{ date('Y') }} {{ config('app.name', 'PetWear') }}. All rights reserved.</p>
                 <p class="text-xs text-gray-600">Crafted with care for pet lovers everywhere.</p>
             </div>
         </div>

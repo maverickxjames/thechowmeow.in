@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'Shopping Cart — PetWear')
+@section('title', 'Shopping Cart — ' . config('app.name', 'PetWear'))
 
 @section('content')
 <div class="bg-gray-50 border-b border-gray-100">
@@ -90,30 +90,49 @@
                             </form>
                         @endif
 
-                        <div class="flex justify-between">
-                            <span class="text-gray-500">Shipping</span>
-                            @if($cart->total >= 999)
+                        @php
+                            $shippingService = app(\App\Services\ShippingService::class);
+                            $shippingType = $shippingService->detectShippingType();
+                            $shippingCost = $shippingService->calculateShipping($cart, $shippingType);
+                            
+                            $totalWeight = 0;
+                            foreach($cart->items as $item) {
+                                $totalWeight += ($item->variant->product->weight ?? 0) * $item->quantity;
+                            }
+                        @endphp
+
+                        <div class="flex justify-between items-start">
+                            <div class="flex flex-col">
+                                <span class="text-gray-500">Shipping</span>
+                                @if($totalWeight > 0)
+                                    <span class="text-[10px] text-gray-400">Total weight: {{ number_format($totalWeight, 2) }} kg</span>
+                                @endif
+                                <span class="text-[10px] text-violet-600 uppercase font-bold tracking-tighter">{{ $shippingType }}</span>
+                            </div>
+                            @if($shippingCost == 0)
                                 <span class="font-semibold text-emerald-700">Free</span>
                             @else
-                                <span class="font-semibold text-gray-900">{{ currency_format(99) }}</span>
+                                <span class="font-semibold text-gray-900">{{ currency_format($shippingCost) }}</span>
                             @endif
                         </div>
 
-                        @if($cart->total < 999)
+                        @php
+                            $threshold = (float) (App\Models\Setting::where('key', 'free_shipping_threshold')->value('value') ?? 0);
+                        @endphp
+                        @if($threshold > 0 && $cart->total < $threshold)
                             <p class="text-xs text-gray-400 bg-gray-50 rounded-lg px-3 py-2">
-                                Add {{ currency_format(999 - $cart->total) }} more for free shipping
+                                Add {{ currency_format($threshold - $cart->total) }} more for free shipping
                             </p>
                         @endif
 
                         <div class="border-t border-gray-100 pt-3 mt-1">
                             @php
                                 $discount = $coupon['discount'] ?? 0;
-                                $shipping = $cart->total >= 999 ? 0 : 99;
-                                $total = $cart->total - $discount + $shipping;
+                                $total = $cart->total - $discount + $shippingCost;
                             @endphp
                             <div class="flex justify-between">
                                 <span class="font-bold text-gray-900">Total</span>
-                                <span class="font-bold text-xl text-gray-900">₹{{ number_format($total) }}</span>
+                                <span class="font-bold text-xl text-gray-900">{{ currency_format($total) }}</span>
                             </div>
                         </div>
                     </div>

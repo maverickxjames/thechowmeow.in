@@ -11,7 +11,7 @@ class Product extends Model
 {
     protected $fillable = [
         'name', 'slug', 'description', 'short_description', 'base_price',
-        'is_active', 'is_featured', 'meta_title', 'meta_description', 'views_count',
+        'is_active', 'is_featured', 'meta_title', 'meta_description', 'views_count', 'weight',
     ];
 
     protected $casts = [
@@ -104,6 +104,13 @@ class Product extends Model
     public function getPrimaryImageUrlAttribute()
     {
         $image = $this->primaryImage ?? $this->images->first();
-        return $image ? asset('storage/' . $image->image_path) : asset('images/placeholder.png');
+        if ($image) {
+            // R2 images are stored as full URLs; local images as relative paths.
+            if (str_starts_with($image->image_path, 'http://') || str_starts_with($image->image_path, 'https://')) {
+                return $image->image_path;
+            }
+            return \Illuminate\Support\Facades\Storage::disk('public')->url($image->image_path);
+        }
+        return asset('images/placeholder.png');
     }
 }

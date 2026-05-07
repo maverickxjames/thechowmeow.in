@@ -26,9 +26,12 @@ class SettingsServiceProvider extends ServiceProvider
             if (Schema::hasTable('settings')) {
                 $settings = Setting::all()->pluck('value', 'key');
                 
-                // Override App Name
+                // Override App Name and Logo
                 if ($settings->has('app_name')) {
                     Config::set('app.name', $settings['app_name']);
+                }
+                if ($settings->has('app_logo')) {
+                    Config::set('app.logo', $settings['app_logo']);
                 }
 
                 // SMTP Configuration

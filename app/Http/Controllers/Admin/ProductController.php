@@ -22,7 +22,7 @@ class ProductController extends Controller
             ->when($request->featured === '1',     fn($q) => $q->where('is_featured', true))
             ->when($request->category_id, fn($q, $v) => $q->whereHas('categories', fn($cq) => $cq->where('categories.id', $v)))
             ->latest()
-            ->paginate(15)
+            ->paginate($request->get('per_page', 15))
             ->withQueryString();
 
         $categories = Category::orderBy('name')->get();
@@ -81,6 +81,7 @@ class ProductController extends Controller
             'is_featured' => 'boolean',
             'meta_title' => 'nullable|string|max:255',
             'meta_description' => 'nullable|string|max:500',
+            'weight' => 'nullable|numeric|min:0',
             'categories' => 'array',
             'categories.*' => 'exists:categories,id',
             'images' => 'nullable|array',
@@ -118,6 +119,7 @@ class ProductController extends Controller
             'is_featured' => 'boolean',
             'meta_title' => 'nullable|string|max:255',
             'meta_description' => 'nullable|string|max:500',
+            'weight' => 'nullable|numeric|min:0',
             'categories' => 'array',
             'categories.*' => 'exists:categories,id',
             'images' => 'nullable|array',
@@ -140,6 +142,26 @@ class ProductController extends Controller
     {
         $this->productService->delete($product);
         return redirect()->route('admin.products.index')->with('success', 'Product deleted successfully.');
+    }
+
+    public function bulkDestroy(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|array|min:1',
+            'ids.*' => 'exists:products,id',
+        ]);
+
+        $count = 0;
+        foreach ($request->ids as $id) {
+            $product = Product::find($id);
+            if ($product) {
+                $this->productService->delete($product);
+                $count++;
+            }
+        }
+
+        return redirect()->route('admin.products.index')
+            ->with('success', "{$count} product(s) deleted successfully.");
     }
 
     // Variant management

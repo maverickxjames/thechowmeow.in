@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', request('search') ? '"' . request('search') . '" — PetWear' : 'All Products — PetWear')
+@section('title', request('search') ? '"' . request('search') . '" — ' . config('app.name', 'PetWear') : 'All Products — ' . config('app.name', 'PetWear'))
 
 @section('content')
 <div class="bg-gray-50 border-b border-gray-100">

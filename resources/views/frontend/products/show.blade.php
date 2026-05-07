@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', $product->meta_title ?: $product->name . ' — PetWear')
+@section('title', $product->meta_title ?: $product->name . ' — ' . config('app.name', 'PetWear'))
 @section('meta_description', $product->meta_description ?: $product->short_description)
 
 @push('styles')

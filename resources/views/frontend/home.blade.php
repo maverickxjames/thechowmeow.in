@@ -1,6 +1,6 @@
 @extends('layouts.app')
-@section('title', 'PetWear — Premium Pet Clothing for Dogs & Cats')
-@section('meta_description', 'Shop the best clothing for your beloved dogs and cats. Casual wear, festive outfits, accessories and more at PetWear.')
+@section('title', config('app.name', 'PetWear') . ' — Premium Pet Clothing for Dogs & Cats')
+@section('meta_description', 'Shop the best clothing for your beloved dogs and cats. Casual wear, festive outfits, accessories and more at ' . config('app.name', 'PetWear') . '.')
 
 @section('content')
 

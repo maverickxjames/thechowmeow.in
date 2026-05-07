@@ -31,7 +31,12 @@ class OrderService
             }
 
             $tax = round(($subtotal - $discount) * 0.00, 2); // Tax rate configurable
-            $shippingCost = $subtotal >= 999 ? 0 : 99; // Free shipping over 999
+            
+            // New Shipping Logic
+            $shippingService = app(\App\Services\ShippingService::class);
+            $shippingType = $shippingService->detectShippingType();
+            $shippingCost = $shippingService->calculateShipping($cart, $shippingType);
+            
             $total = $subtotal - $discount + $tax + $shippingCost;
 
             $order = Order::create([
@@ -42,6 +47,7 @@ class OrderService
                 'discount' => $discount,
                 'tax' => $tax,
                 'shipping_cost' => $shippingCost,
+                'shipping_type' => $shippingType,
                 'total' => $total,
                 'payment_status' => 'pending',
                 'payment_method' => $data['payment_method'] ?? 'cod',

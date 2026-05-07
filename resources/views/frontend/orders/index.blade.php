@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'My Orders — PetWear')
+@section('title', 'My Orders — ' . config('app.name', 'PetWear'))
 
 @section('content')
 <div class="bg-gray-50 border-b border-gray-100">

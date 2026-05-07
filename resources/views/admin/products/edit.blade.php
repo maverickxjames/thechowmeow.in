@@ -38,6 +38,15 @@
                                class="w-full pl-7 rounded-lg border-gray-200 text-sm focus:border-violet-400 focus:ring-violet-200">
                     </div>
                 </div>
+                <div>
+                    <label class="text-sm font-medium text-gray-700 block mb-1.5">Weight (kg)</label>
+                    <div class="relative">
+                        <span class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">kg</span>
+                        <input type="number" step="0.01" name="weight" value="{{ old('weight', $product->weight) }}" 
+                               class="w-full pr-8 rounded-lg border-gray-200 text-sm focus:border-violet-400 focus:ring-violet-200" placeholder="e.g. 0.5">
+                    </div>
+                    <p class="text-[10px] text-gray-400 mt-1">Leave empty to use fixed shipping fee.</p>
+                </div>
                 <div class="flex items-center gap-6 pt-6">
                     <label class="flex items-center gap-2 cursor-pointer">
                         <input type="checkbox" name="is_active" value="1" {{ old('is_active', $product->is_active) ? 'checked' : '' }}
@@ -148,164 +157,238 @@
                 </div>
             </div>
 
-            {{-- Hidden file inputs --}}
-            <div x-ref="hiddenInputs"></div>
-        </div>
+        {{-- Hidden file inputs --}}
+        <div x-ref="hiddenInputs"></div>
 
-        {{-- SEO --}}
-        <div class="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
-            <h3 class="font-bold text-gray-900">SEO</h3>
-            <div>
-                <label class="text-sm font-medium text-gray-700 block mb-1.5">Meta Title</label>
-                <input type="text" name="meta_title" value="{{ old('meta_title', $product->meta_title) }}"
-                       class="w-full rounded-lg border-gray-200 text-sm focus:border-violet-400 focus:ring-violet-200">
-            </div>
-            <div>
-                <label class="text-sm font-medium text-gray-700 block mb-1.5">Meta Description</label>
-                <textarea name="meta_description" rows="2" class="w-full rounded-lg border-gray-200 text-sm focus:border-violet-400 focus:ring-violet-200">{{ old('meta_description', $product->meta_description) }}</textarea>
-            </div>
-        </div>
-
-        <button type="submit" class="px-6 py-2.5 bg-violet-600 text-white rounded-lg font-semibold hover:bg-violet-700 transition-colors text-sm">
-            Update Product
-        </button>
-    </form>
-
-    {{-- Variants Section --}}
-    <div class="bg-white rounded-xl border border-gray-200 p-6">
-        <div class="flex items-center justify-between mb-5">
-            <div>
-                <h3 class="font-bold text-gray-900">Product Variants</h3>
-                <p class="text-xs text-gray-400 mt-0.5">{{ $product->variants->count() }} variant(s)</p>
-            </div>
-        </div>
-
-        {{-- Existing Variants --}}
-        @if($product->variants->count())
-            <div class="overflow-x-auto mb-6 rounded-lg border border-gray-100">
-                <table class="w-full text-sm">
-                    <thead>
-                        <tr class="bg-gray-50 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                            <th class="px-4 py-3">Size</th>
-                            <th class="px-4 py-3">Color</th>
-                            <th class="px-4 py-3">SKU</th>
-                            <th class="px-4 py-3">Price</th>
-                            <th class="px-4 py-3">Sale</th>
-                            <th class="px-4 py-3">Stock</th>
-                            <th class="px-4 py-3"></th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-50">
-                        @foreach($product->variants as $variant)
-                            <tr class="hover:bg-gray-50/50">
-                                <td class="px-4 py-3 font-medium text-gray-800">{{ $variant->size ?? '—' }}</td>
-                                <td class="px-4 py-3 text-gray-600">{{ $variant->color ?? '—' }}</td>
-                                <td class="px-4 py-3"><span class="font-mono text-xs text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">{{ $variant->sku }}</span></td>
-                                <td class="px-4 py-3 font-medium">₹{{ number_format($variant->price) }}</td>
-                                <td class="px-4 py-3 text-emerald-600 font-medium">{{ $variant->sale_price ? '₹'.number_format($variant->sale_price) : ($variant->discount_percent ? $variant->discount_percent.'%' : '—') }}</td>
-                                <td class="px-4 py-3">
-                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold {{ $variant->stock_quantity <= 5 ? 'bg-red-50 text-red-600' : 'bg-emerald-50 text-emerald-600' }}">
-                                        {{ $variant->stock_quantity }}
-                                    </span>
-                                </td>
-                                <td class="px-4 py-3">
-                                    <form action="{{ route('admin.variants.destroy', $variant) }}" method="POST" onsubmit="return confirm('Delete this variant?')">
-                                        @csrf @method('DELETE')
-                                        <button class="text-red-500 hover:text-red-700 text-xs font-semibold transition-colors">Delete</button>
-                                    </form>
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-        @else
-            <div class="text-center py-8 mb-6 border border-dashed border-gray-200 rounded-xl">
-                <svg class="w-10 h-10 text-gray-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
-                <p class="text-sm text-gray-500">No variants yet. Add one below.</p>
-            </div>
-        @endif
-
-        {{-- Add Variant Form --}}
-        <form action="{{ route('admin.products.variants.store', $product) }}" method="POST"
-              class="bg-gray-50 rounded-xl p-5 border border-gray-100">
-            @csrf
-            <h4 class="font-semibold text-gray-800 text-sm mb-4 flex items-center gap-2">
-                <svg class="w-4 h-4 text-violet-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
-                Add New Variant
-            </h4>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                <div>
-                    <label class="text-xs font-medium text-gray-600 block mb-1">Size</label>
-                    <select name="size" class="w-full rounded-lg border-gray-200 text-sm focus:border-violet-400 focus:ring-violet-200">
-                        <option value="">Select</option>
-                        @foreach(['XS','S','M','L','XL','XXL','3XL'] as $s)
-                            <option value="{{ $s }}">{{ $s }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div>
-                    <label class="text-xs font-medium text-gray-600 block mb-1">Color</label>
-                    <input type="text" name="color" placeholder="e.g. Red" class="w-full rounded-lg border-gray-200 text-sm focus:border-violet-400 focus:ring-violet-200">
-                </div>
-                <div>
-                    <label class="text-xs font-medium text-gray-600 block mb-1">SKU <span class="text-red-400">*</span></label>
-                    <input type="text" name="sku" required class="w-full rounded-lg border-gray-200 text-sm focus:border-violet-400 focus:ring-violet-200">
-                </div>
-                <div>
-                    <label class="text-xs font-medium text-gray-600 block mb-1">Price <span class="text-red-400">*</span></label>
-                    <input type="number" step="0.01" name="price" required class="w-full rounded-lg border-gray-200 text-sm focus:border-violet-400 focus:ring-violet-200">
-                </div>
-                <div>
-                    <label class="text-xs font-medium text-gray-600 block mb-1">Sale Price</label>
-                    <input type="number" step="0.01" name="sale_price" class="w-full rounded-lg border-gray-200 text-sm focus:border-violet-400 focus:ring-violet-200">
-                </div>
-                <div>
-                    <label class="text-xs font-medium text-gray-600 block mb-1">Discount %</label>
-                    <input type="number" name="discount_percent" min="0" max="100" class="w-full rounded-lg border-gray-200 text-sm focus:border-violet-400 focus:ring-violet-200">
-                </div>
-                <div>
-                    <label class="text-xs font-medium text-gray-600 block mb-1">Stock <span class="text-red-400">*</span></label>
-                    <input type="number" name="stock_quantity" required value="0" class="w-full rounded-lg border-gray-200 text-sm focus:border-violet-400 focus:ring-violet-200">
-                </div>
-                <div class="flex items-end">
-                    <button type="submit" class="w-full px-4 py-2 bg-violet-600 text-white rounded-lg text-sm font-semibold hover:bg-violet-700 transition-colors inline-flex items-center justify-center gap-1.5">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
-                        Add Variant
+        {{-- Cropping Modal --}}
+        <div x-show="showCropModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80" x-cloak>
+            <div class="bg-white rounded-xl shadow-2xl overflow-hidden flex flex-col" style="width: 90vw; max-width: 800px; max-height: 90vh;">
+                <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                    <h3 class="font-bold text-gray-900">Crop Image <span x-text="queueCount > 0 ? '(' + queueCount + ' more)' : ''" class="text-gray-500 font-normal"></span></h3>
+                    <button type="button" @click="cancelCrop()" class="text-gray-400 hover:text-gray-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                     </button>
                 </div>
+                <div class="p-4 flex-1 overflow-hidden bg-black flex items-center justify-center min-h-[400px]">
+                    <img x-ref="cropImage" class="max-w-full max-h-full">
+                </div>
+                <div class="p-4 border-t border-gray-100 bg-gray-50 flex justify-end gap-3">
+                    <button type="button" @click="cancelCrop()" class="px-5 py-2 text-gray-600 font-semibold hover:bg-gray-200 rounded-lg transition-colors text-sm">Skip / Cancel</button>
+                    <button type="button" @click="confirmCrop()" class="px-5 py-2 bg-violet-600 text-white font-semibold hover:bg-violet-700 rounded-lg transition-colors text-sm">Crop & Add</button>
+                </div>
             </div>
-        </form>
+        </div>
     </div>
+
+    {{-- SEO --}}
+    <div class="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
+        <h3 class="font-bold text-gray-900">SEO</h3>
+        <div>
+            <label class="text-sm font-medium text-gray-700 block mb-1.5">Meta Title</label>
+            <input type="text" name="meta_title" value="{{ old('meta_title', $product->meta_title) }}"
+                   class="w-full rounded-lg border-gray-200 text-sm focus:border-violet-400 focus:ring-violet-200">
+        </div>
+        <div>
+            <label class="text-sm font-medium text-gray-700 block mb-1.5">Meta Description</label>
+            <textarea name="meta_description" rows="2" class="w-full rounded-lg border-gray-200 text-sm focus:border-violet-400 focus:ring-violet-200">{{ old('meta_description', $product->meta_description) }}</textarea>
+        </div>
+    </div>
+
+    <button type="submit" class="px-6 py-2.5 bg-violet-600 text-white rounded-lg font-semibold hover:bg-violet-700 transition-colors text-sm">
+        Update Product
+    </button>
+</form>
+
+{{-- Variants Section --}}
+<div class="bg-white rounded-xl border border-gray-200 p-6">
+    <div class="flex items-center justify-between mb-5">
+        <div>
+            <h3 class="font-bold text-gray-900">Product Variants</h3>
+            <p class="text-xs text-gray-400 mt-0.5">{{ $product->variants->count() }} variant(s)</p>
+        </div>
+    </div>
+
+    {{-- Existing Variants --}}
+    @if($product->variants->count())
+        <div class="overflow-x-auto mb-6 rounded-lg border border-gray-100">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="bg-gray-50 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                        <th class="px-4 py-3">Size</th>
+                        <th class="px-4 py-3">Color</th>
+                        <th class="px-4 py-3">SKU</th>
+                        <th class="px-4 py-3">Price</th>
+                        <th class="px-4 py-3">Sale</th>
+                        <th class="px-4 py-3">Stock</th>
+                        <th class="px-4 py-3"></th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-50">
+                    @foreach($product->variants as $variant)
+                        <tr class="hover:bg-gray-50/50">
+                            <td class="px-4 py-3 font-medium text-gray-800">{{ $variant->size ?? '—' }}</td>
+                            <td class="px-4 py-3 text-gray-600">{{ $variant->color ?? '—' }}</td>
+                            <td class="px-4 py-3"><span class="font-mono text-xs text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">{{ $variant->sku }}</span></td>
+                            <td class="px-4 py-3 font-medium">₹{{ number_format($variant->price) }}</td>
+                            <td class="px-4 py-3 text-emerald-600 font-medium">{{ $variant->sale_price ? '₹'.number_format($variant->sale_price) : ($variant->discount_percent ? $variant->discount_percent.'%' : '—') }}</td>
+                            <td class="px-4 py-3">
+                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold {{ $variant->stock_quantity <= 5 ? 'bg-red-50 text-red-600' : 'bg-emerald-50 text-emerald-600' }}">
+                                    {{ $variant->stock_quantity }}
+                                </span>
+                            </td>
+                            <td class="px-4 py-3">
+                                <form action="{{ route('admin.variants.destroy', $variant) }}" method="POST" onsubmit="return confirm('Delete this variant?')">
+                                    @csrf @method('DELETE')
+                                    <button class="text-red-500 hover:text-red-700 text-xs font-semibold transition-colors">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    @else
+        <div class="text-center py-8 mb-6 border border-dashed border-gray-200 rounded-xl">
+            <svg class="w-10 h-10 text-gray-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+            <p class="text-sm text-gray-500">No variants yet. Add one below.</p>
+        </div>
+    @endif
+
+    {{-- Add Variant Form --}}
+    <form action="{{ route('admin.products.variants.store', $product) }}" method="POST"
+          class="bg-gray-50 rounded-xl p-5 border border-gray-100">
+        @csrf
+        <h4 class="font-semibold text-gray-800 text-sm mb-4 flex items-center gap-2">
+            <svg class="w-4 h-4 text-violet-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+            Add New Variant
+        </h4>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div>
+                <label class="text-xs font-medium text-gray-600 block mb-1">Size</label>
+                <select name="size" class="w-full rounded-lg border-gray-200 text-sm focus:border-violet-400 focus:ring-violet-200">
+                    <option value="">Select</option>
+                    @foreach(['XS','S','M','L','XL','XXL','3XL'] as $s)
+                        <option value="{{ $s }}">{{ $s }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
+                <label class="text-xs font-medium text-gray-600 block mb-1">Color</label>
+                <input type="text" name="color" placeholder="e.g. Red" class="w-full rounded-lg border-gray-200 text-sm focus:border-violet-400 focus:ring-violet-200">
+            </div>
+            <div>
+                <label class="text-xs font-medium text-gray-600 block mb-1">SKU <span class="text-red-400">*</span></label>
+                <input type="text" name="sku" required class="w-full rounded-lg border-gray-200 text-sm focus:border-violet-400 focus:ring-violet-200">
+            </div>
+            <div>
+                <label class="text-xs font-medium text-gray-600 block mb-1">Price <span class="text-red-400">*</span></label>
+                <input type="number" step="0.01" name="price" required class="w-full rounded-lg border-gray-200 text-sm focus:border-violet-400 focus:ring-violet-200">
+            </div>
+            <div>
+                <label class="text-xs font-medium text-gray-600 block mb-1">Sale Price</label>
+                <input type="number" step="0.01" name="sale_price" class="w-full rounded-lg border-gray-200 text-sm focus:border-violet-400 focus:ring-violet-200">
+            </div>
+            <div>
+                <label class="text-xs font-medium text-gray-600 block mb-1">Discount %</label>
+                <input type="number" name="discount_percent" min="0" max="100" class="w-full rounded-lg border-gray-200 text-sm focus:border-violet-400 focus:ring-violet-200">
+            </div>
+            <div>
+                <label class="text-xs font-medium text-gray-600 block mb-1">Stock <span class="text-red-400">*</span></label>
+                <input type="number" name="stock_quantity" required value="0" class="w-full rounded-lg border-gray-200 text-sm focus:border-violet-400 focus:ring-violet-200">
+            </div>
+            <div class="flex items-end">
+                <button type="submit" class="w-full px-4 py-2 bg-violet-600 text-white rounded-lg text-sm font-semibold hover:bg-violet-700 transition-colors inline-flex items-center justify-center gap-1.5">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+                    Add Variant
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
 </div>
 
 @push('scripts')
 <script>
 function imageManager() {
+    let rawQueue = [];
+    let currentRawFile = null;
+
     return {
         files: [],
+        showCropModal: false,
+        queueCount: 0,
+        cropperInstance: null,
         dragging: false,
         dragIndex: null,
         nextId: 0,
 
         handleFiles(event) {
             const newFiles = Array.from(event.target.files);
-            this.addFiles(newFiles);
+            rawQueue.push(...newFiles);
+            this.queueCount = rawQueue.length;
+            this.processQueue();
             event.target.value = '';
         },
 
         handleDrop(event) {
             this.dragging = false;
             const newFiles = Array.from(event.dataTransfer.files).filter(f => f.type.startsWith('image/'));
-            this.addFiles(newFiles);
+            rawQueue.push(...newFiles);
+            this.queueCount = rawQueue.length;
+            this.processQueue();
         },
 
-        addFiles(newFiles) {
-            newFiles.forEach(file => {
-                if (file.size > 2 * 1024 * 1024) {
-                    alert(file.name + ' exceeds 2MB limit');
-                    return;
+        processQueue() {
+            if (this.showCropModal || rawQueue.length === 0) return;
+            currentRawFile = rawQueue.shift();
+            this.queueCount = rawQueue.length;
+            this.showCropModal = true;
+            
+            this.$nextTick(() => {
+                const imageElement = this.$refs.cropImage;
+                
+                if (this.cropperInstance) {
+                    this.cropperInstance.destroy();
+                    this.cropperInstance = null;
                 }
+
+                imageElement.onload = () => {
+                    this.cropperInstance = new Cropper(imageElement, {
+                        aspectRatio: 1,
+                        viewMode: 1,
+                        autoCropArea: 1,
+                        background: false,
+                        responsive: true,
+                    });
+                };
+                
+                imageElement.src = URL.createObjectURL(currentRawFile);
+            });
+        },
+
+        cancelCrop() {
+            if (this.cropperInstance) {
+                this.cropperInstance.destroy();
+                this.cropperInstance = null;
+            }
+            this.$refs.cropImage.src = '';
+            this.showCropModal = false;
+            currentRawFile = null;
+            setTimeout(() => this.processQueue(), 100);
+        },
+
+        confirmCrop() {
+            if (!this.cropperInstance) return;
+            
+            this.cropperInstance.getCroppedCanvas({
+                width: 1200,
+                height: 1200,
+                imageSmoothingEnabled: true,
+                imageSmoothingQuality: 'high',
+            }).toBlob((blob) => {
+                const fileName = currentRawFile.name;
+                const file = new File([blob], fileName, { type: 'image/jpeg', lastModified: new Date().getTime() });
+                
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     this.files.push({
@@ -317,7 +400,9 @@ function imageManager() {
                     this.updateHiddenInputs();
                 };
                 reader.readAsDataURL(file);
-            });
+
+                this.cancelCrop();
+            }, 'image/jpeg', 0.9);
         },
 
         removeFile(index) {

@@ -12,8 +12,9 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
-            'admin' => \App\Http\Middleware\AdminMiddleware::class,
-            'share.menu' => \App\Http\Middleware\ShareMenuData::class,
+            'admin'       => \App\Http\Middleware\AdminMiddleware::class,
+            'share.menu'  => \App\Http\Middleware\ShareMenuData::class,
+            'maintenance' => \App\Http\Middleware\MaintenanceMode::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

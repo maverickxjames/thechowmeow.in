@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', $category->meta_title ?: $category->name . ' — PetWear')
+@section('title', $category->meta_title ?: $category->name . ' — ' . config('app.name', 'PetWear'))
 
 @section('content')
 <div class="bg-gray-50 border-b border-gray-100">

@@ -12,7 +12,7 @@ class Order extends Model
         'user_id', 'order_number', 'status', 'subtotal', 'discount',
         'tax', 'shipping_cost', 'total', 'payment_status', 'payment_method',
         'payment_id', 'shipping_address_id', 'billing_address_id',
-        'coupon_code', 'notes',
+        'coupon_code', 'notes', 'shipping_type', 'shipping_provider', 'tracking_id',
     ];
 
     protected $casts = [

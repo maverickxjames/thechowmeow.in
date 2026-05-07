@@ -36,6 +36,15 @@
                            class="w-full pl-7 rounded-lg border-gray-200 text-sm focus:border-violet-400 focus:ring-violet-200">
                 </div>
             </div>
+            <div>
+                <label class="text-sm font-medium text-gray-700 block mb-1.5">Weight (kg)</label>
+                <div class="relative">
+                    <span class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">kg</span>
+                    <input type="number" step="0.01" name="weight" value="{{ old('weight') }}" 
+                           class="w-full pr-8 rounded-lg border-gray-200 text-sm focus:border-violet-400 focus:ring-violet-200" placeholder="e.g. 0.5">
+                </div>
+                <p class="text-[10px] text-gray-400 mt-1">Leave empty to use fixed shipping fee.</p>
+            </div>
             <div class="flex items-center gap-6 pt-6">
                 <label class="flex items-center gap-2 cursor-pointer">
                     <input type="checkbox" name="is_active" value="1" {{ old('is_active', true) ? 'checked' : '' }}
@@ -130,6 +139,25 @@
 
         {{-- Hidden file inputs for form submission --}}
         <div x-ref="hiddenInputs"></div>
+
+        {{-- Cropping Modal --}}
+        <div x-show="showCropModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80" x-cloak>
+            <div class="bg-white rounded-xl shadow-2xl overflow-hidden flex flex-col" style="width: 90vw; max-width: 800px; max-height: 90vh;">
+                <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                    <h3 class="font-bold text-gray-900">Crop Image <span x-text="queueCount > 0 ? '(' + queueCount + ' more)' : ''" class="text-gray-500 font-normal"></span></h3>
+                    <button type="button" @click="cancelCrop()" class="text-gray-400 hover:text-gray-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+                <div class="p-4 flex-1 overflow-hidden bg-black flex items-center justify-center min-h-[400px]">
+                    <img x-ref="cropImage" class="max-w-full max-h-full">
+                </div>
+                <div class="p-4 border-t border-gray-100 bg-gray-50 flex justify-end gap-3">
+                    <button type="button" @click="cancelCrop()" class="px-5 py-2 text-gray-600 font-semibold hover:bg-gray-200 rounded-lg transition-colors text-sm">Skip / Cancel</button>
+                    <button type="button" @click="confirmCrop()" class="px-5 py-2 bg-violet-600 text-white font-semibold hover:bg-violet-700 rounded-lg transition-colors text-sm">Crop & Add</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     {{-- SEO --}}
@@ -160,30 +188,85 @@
 @push('scripts')
 <script>
 function imageUploader() {
+    let rawQueue = [];
+    let currentRawFile = null;
+
     return {
         files: [],
+        showCropModal: false,
+        queueCount: 0,
+        cropperInstance: null,
         dragging: false,
         dragIndex: null,
         nextId: 0,
 
         handleFiles(event) {
             const newFiles = Array.from(event.target.files);
-            this.addFiles(newFiles);
+            rawQueue.push(...newFiles);
+            this.queueCount = rawQueue.length;
+            this.processQueue();
             event.target.value = '';
         },
 
         handleDrop(event) {
             this.dragging = false;
             const newFiles = Array.from(event.dataTransfer.files).filter(f => f.type.startsWith('image/'));
-            this.addFiles(newFiles);
+            rawQueue.push(...newFiles);
+            this.queueCount = rawQueue.length;
+            this.processQueue();
         },
 
-        addFiles(newFiles) {
-            newFiles.forEach(file => {
-                if (file.size > 2 * 1024 * 1024) {
-                    alert(file.name + ' exceeds 2MB limit');
-                    return;
+        processQueue() {
+            if (this.showCropModal || rawQueue.length === 0) return;
+            currentRawFile = rawQueue.shift();
+            this.queueCount = rawQueue.length;
+            this.showCropModal = true;
+            
+            this.$nextTick(() => {
+                const imageElement = this.$refs.cropImage;
+                
+                if (this.cropperInstance) {
+                    this.cropperInstance.destroy();
+                    this.cropperInstance = null;
                 }
+
+                imageElement.onload = () => {
+                    this.cropperInstance = new Cropper(imageElement, {
+                        aspectRatio: 1,
+                        viewMode: 1,
+                        autoCropArea: 1,
+                        background: false,
+                        responsive: true,
+                    });
+                };
+                
+                imageElement.src = URL.createObjectURL(currentRawFile);
+            });
+        },
+
+        cancelCrop() {
+            if (this.cropperInstance) {
+                this.cropperInstance.destroy();
+                this.cropperInstance = null;
+            }
+            this.$refs.cropImage.src = '';
+            this.showCropModal = false;
+            currentRawFile = null;
+            setTimeout(() => this.processQueue(), 100);
+        },
+
+        confirmCrop() {
+            if (!this.cropperInstance) return;
+            
+            this.cropperInstance.getCroppedCanvas({
+                width: 1200,
+                height: 1200,
+                imageSmoothingEnabled: true,
+                imageSmoothingQuality: 'high',
+            }).toBlob((blob) => {
+                const fileName = currentRawFile.name;
+                const file = new File([blob], fileName, { type: 'image/jpeg', lastModified: new Date().getTime() });
+                
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     this.files.push({
@@ -195,7 +278,9 @@ function imageUploader() {
                     this.updateHiddenInputs();
                 };
                 reader.readAsDataURL(file);
-            });
+
+                this.cancelCrop();
+            }, 'image/jpeg', 0.9);
         },
 
         removeFile(index) {

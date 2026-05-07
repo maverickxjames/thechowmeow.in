@@ -4,10 +4,12 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Admin | @yield('title', 'Dashboard') - PetWear</title>
+    <title>Admin | @yield('title', 'Dashboard') - {{ config('app.name', 'PetWear') }}</title>
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=inter:300,400,500,600,700,800&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
     <style>
         .sidebar-section-label { font-size: 0.625rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #6b7280; padding: 0.75rem 1rem 0.35rem; }
         .sidebar-link { display: flex; align-items: center; gap: 0.65rem; padding: 0.5rem 0.75rem; margin: 0 0.5rem; border-radius: 0.5rem; font-size: 0.8125rem; font-weight: 500; color: #9ca3af; transition: all 0.15s; }
@@ -32,16 +34,22 @@
             {{-- Logo --}}
             <div class="flex items-center h-16 px-4 border-b border-white/5 shrink-0">
                 <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-2.5 overflow-hidden">
-                    <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shrink-0">
-                        <svg class="w-4.5 h-4.5 text-white" viewBox="0 0 100 100" fill="currentColor">
-                            <ellipse cx="50" cy="68" rx="22" ry="18"/>
-                            <ellipse cx="28" cy="44" rx="10" ry="12" transform="rotate(-15 28 44)"/>
-                            <ellipse cx="72" cy="44" rx="10" ry="12" transform="rotate(15 72 44)"/>
-                            <ellipse cx="38" cy="28" rx="9" ry="11" transform="rotate(-10 38 28)"/>
-                            <ellipse cx="62" cy="28" rx="9" ry="11" transform="rotate(10 62 28)"/>
-                        </svg>
-                    </div>
-                    <span x-show="sidebarOpen" x-transition class="text-base font-bold text-white whitespace-nowrap">PetWear</span>
+                    @if(config('app.logo'))
+                        <div class="w-8 h-8 flex items-center justify-center shrink-0">
+                            <img src="{{ Storage::url(config('app.logo')) }}" alt="Logo" class="w-full h-full object-contain">
+                        </div>
+                    @else
+                        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shrink-0">
+                            <svg class="w-4.5 h-4.5 text-white" viewBox="0 0 100 100" fill="currentColor">
+                                <ellipse cx="50" cy="68" rx="22" ry="18"/>
+                                <ellipse cx="28" cy="44" rx="10" ry="12" transform="rotate(-15 28 44)"/>
+                                <ellipse cx="72" cy="44" rx="10" ry="12" transform="rotate(15 72 44)"/>
+                                <ellipse cx="38" cy="28" rx="9" ry="11" transform="rotate(-10 38 28)"/>
+                                <ellipse cx="62" cy="28" rx="9" ry="11" transform="rotate(10 62 28)"/>
+                            </svg>
+                        </div>
+                    @endif
+                    <span x-show="sidebarOpen" x-transition class="text-base font-bold text-white whitespace-nowrap">{{ config('app.name', 'PetWear') }}</span>
                 </a>
                 <button @click="sidebarOpen = !sidebarOpen" class="ml-auto p-1.5 rounded-md hover:bg-white/5 text-gray-500 hover:text-gray-300 hidden lg:block transition-colors">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -80,6 +88,11 @@
                    class="sidebar-link {{ request()->routeIs('admin.inventory.*') ? 'active' : '' }}">
                     <svg class="sidebar-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
                     <span x-show="sidebarOpen" x-transition>Inventory</span>
+                </a>
+                <a href="{{ route('admin.import.index') }}"
+                   class="sidebar-link {{ request()->routeIs('admin.import.*') ? 'active' : '' }}">
+                    <svg class="sidebar-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                    <span x-show="sidebarOpen" x-transition>Import</span>
                 </a>
                 <a href="{{ route('admin.reviews.index') }}"
                    class="sidebar-link {{ request()->routeIs('admin.reviews.*') ? 'active' : '' }}">

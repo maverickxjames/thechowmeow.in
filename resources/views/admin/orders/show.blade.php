@@ -59,6 +59,25 @@
             </form>
         </div>
 
+        {{-- Shipping & Tracking --}}
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+            <h3 class="font-bold text-gray-800 mb-4">Shipping & Tracking</h3>
+            <form action="{{ route('admin.orders.shipping', $order) }}" method="POST" class="space-y-3">
+                @csrf @method('PUT')
+                <div>
+                    <label class="text-xs font-bold text-gray-500 block mb-1">Provider</label>
+                    <input type="text" name="shipping_provider" value="{{ $order->shipping_provider }}" placeholder="e.g. Delhivery, FedEx"
+                           class="w-full rounded-lg border-gray-200 text-sm focus:border-purple-400 focus:ring-purple-200">
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-gray-500 block mb-1">Tracking ID</label>
+                    <input type="text" name="tracking_id" value="{{ $order->tracking_id }}" placeholder="Enter Tracking ID"
+                           class="w-full rounded-lg border-gray-200 text-sm focus:border-purple-400 focus:ring-purple-200">
+                </div>
+                <button type="submit" class="w-full px-4 py-2 bg-gray-800 text-white rounded-lg text-sm font-semibold hover:bg-gray-900 transition-colors">Update Shipping Info</button>
+            </form>
+        </div>
+
         {{-- Customer Info --}}
         <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
             <h3 class="font-bold text-gray-800 mb-3">Customer</h3>

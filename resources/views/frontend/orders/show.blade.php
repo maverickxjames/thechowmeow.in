@@ -1,27 +1,31 @@
 @extends('layouts.app')
-@section('title', 'Order ' . $order->order_number . ' — PetWear')
+@section('title', 'Order ' . $order->order_number . ' — ' . config('app.name', 'PetWear'))
 
 @section('content')
 <div class="bg-gray-50 border-b border-gray-100">
     <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <nav class="flex items-center gap-2 text-sm text-gray-400 mb-2">
             <a href="{{ route('home') }}" class="hover:text-violet-700 transition-colors">Home</a>
-            <svg class="w-3.5 h-3.5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            <svg class="w-3.5 h-3.5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
             <a href="{{ route('orders.index') }}" class="hover:text-violet-700 transition-colors">My Orders</a>
-            <svg class="w-3.5 h-3.5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            <svg class="w-3.5 h-3.5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
             <span class="text-gray-700 font-medium font-mono">{{ $order->order_number }}</span>
         </nav>
         <div class="flex items-center justify-between gap-4">
             <h1 class="text-2xl font-bold text-gray-900 font-mono">{{ $order->order_number }}</h1>
             @php
-                $statusConfig = [
-                    'pending'   => 'bg-amber-50 text-amber-700 border-amber-100',
-                    'paid'      => 'bg-blue-50 text-blue-700 border-blue-100',
-                    'shipped'   => 'bg-violet-50 text-violet-700 border-violet-100',
-                    'delivered' => 'bg-emerald-50 text-emerald-700 border-emerald-100',
-                    'cancelled' => 'bg-red-50 text-red-600 border-red-100',
-                ];
-                $statusCls = $statusConfig[$order->status] ?? 'bg-gray-50 text-gray-600 border-gray-100';
+            $statusConfig = [
+            'pending' => 'bg-amber-50 text-amber-700 border-amber-100',
+            'paid' => 'bg-blue-50 text-blue-700 border-blue-100',
+            'shipped' => 'bg-violet-50 text-violet-700 border-violet-100',
+            'delivered' => 'bg-emerald-50 text-emerald-700 border-emerald-100',
+            'cancelled' => 'bg-red-50 text-red-600 border-red-100',
+            ];
+            $statusCls = $statusConfig[$order->status] ?? 'bg-gray-50 text-gray-600 border-gray-100';
             @endphp
             <span class="px-4 py-1.5 rounded-full text-sm font-semibold border {{ $statusCls }}">
                 {{ ucfirst($order->status) }}
@@ -42,31 +46,31 @@
                 </div>
                 <div class="divide-y divide-gray-50">
                     @foreach($order->items as $item)
-                        <div class="flex items-center gap-4 px-6 py-4">
-                            <div class="flex-1">
-                                <p class="text-sm font-semibold text-gray-900">{{ $item->product_name }}</p>
-                                <p class="text-xs text-gray-400 mt-0.5">{{ $item->variant_info }}</p>
-                                @if($item->sku)
-                                    <p class="text-xs text-gray-300 mt-0.5 font-mono">SKU: {{ $item->sku }}</p>
-                                @endif
-                            </div>
-                            <div class="text-right shrink-0">
-                                <p class="text-xs text-gray-400">Qty: {{ $item->quantity }}</p>
-                                <p class="text-sm font-bold text-gray-900 mt-0.5">{{ currency_format($item->total) }}</p>
-                            </div>
+                    <div class="flex items-center gap-4 px-6 py-4">
+                        <div class="flex-1">
+                            <p class="text-sm font-semibold text-gray-900">{{ $item->product_name }}</p>
+                            <p class="text-xs text-gray-400 mt-0.5">{{ $item->variant_info }}</p>
+                            @if($item->sku)
+                            <p class="text-xs text-gray-300 mt-0.5 font-mono">SKU: {{ $item->sku }}</p>
+                            @endif
                         </div>
+                        <div class="text-right shrink-0">
+                            <p class="text-xs text-gray-400">Qty: {{ $item->quantity }}</p>
+                            <p class="text-sm font-bold text-gray-900 mt-0.5">{{ currency_format($item->total) }}</p>
+                        </div>
+                    </div>
                     @endforeach
                 </div>
             </div>
 
             {{-- Shipping Address --}}
             @if($order->shippingAddress)
-                <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-                    <h2 class="font-bold text-gray-900 text-base mb-3">Shipping Address</h2>
-                    <p class="text-sm font-semibold text-gray-900">{{ $order->shippingAddress->name }}</p>
-                    <p class="text-sm text-gray-500 mt-0.5">{{ $order->shippingAddress->phone }}</p>
-                    <p class="text-sm text-gray-500 mt-1 leading-relaxed">{{ $order->shippingAddress->full_address }}</p>
-                </div>
+            <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+                <h2 class="font-bold text-gray-900 text-base mb-3">Shipping Address</h2>
+                <p class="text-sm font-semibold text-gray-900">{{ $order->shippingAddress->name }}</p>
+                <p class="text-sm text-gray-500 mt-0.5">{{ $order->shippingAddress->phone }}</p>
+                <p class="text-sm text-gray-500 mt-1 leading-relaxed">{{ $order->shippingAddress->full_address }}</p>
+            </div>
             @endif
         </div>
 
@@ -80,17 +84,17 @@
                         <span class="font-medium text-gray-900">{{ currency_format($order->subtotal) }}</span>
                     </div>
                     @if($order->discount > 0)
-                        <div class="flex justify-between text-emerald-700">
-                            <span>Discount</span>
-                            <span class="font-medium">−{{ currency_format($order->discount) }}</span>
-                        </div>
+                    <div class="flex justify-between text-emerald-700">
+                        <span>Discount</span>
+                        <span class="font-medium">−{{ currency_format($order->discount) }}</span>
+                    </div>
                     @endif
                     <div class="flex justify-between text-gray-600">
                         <span>Shipping</span>
                         @if($order->shipping_cost == 0)
-                            <span class="font-medium text-emerald-700">Free</span>
+                        <span class="font-medium text-emerald-700">Free</span>
                         @else
-                            <span class="font-medium text-gray-900">₹{{ number_format($order->shipping_cost) }}</span>
+                        <span class="font-medium text-gray-900">{{ currency_format($order->shipping_cost) }}</span>
                         @endif
                     </div>
                     <div class="border-t border-gray-100 pt-3 mt-1 flex justify-between">
@@ -99,17 +103,42 @@
                     </div>
                 </div>
 
-                @if($order->payment_method)
-                    <div class="mt-5 pt-5 border-t border-gray-100">
-                        <p class="text-xs text-gray-400 uppercase tracking-wide font-semibold mb-1">Payment Method</p>
-                        <p class="text-sm text-gray-700 font-medium">{{ $order->payment_method === 'cod' ? 'Cash on Delivery' : ucfirst($order->payment_method) }}</p>
+                {{-- Tracking Info --}}
+                @if($order->tracking_id)
+                <div class="mt-5 pt-5 border-t border-gray-100">
+                    <p class="text-xs text-gray-400 uppercase tracking-wide font-semibold mb-2">Tracking Information</p>
+                    <div class="bg-gray-50 rounded-lg p-3 border border-gray-100">
+                        <p class="text-xs text-gray-500 font-bold uppercase tracking-tighter">{{ $order->shipping_provider ?? 'Standard Shipping' }}</p>
+                        <p class="text-sm text-gray-900 font-mono mt-1 flex items-center justify-between">
+                            {{ $order->tracking_id }}
+                            <button onclick="navigator.clipboard.writeText('{{ $order->tracking_id }}')" class="text-violet-600 hover:text-violet-800 p-1 rounded transition-colors" title="Copy tracking ID">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                                </svg>
+                            </button>
+                        </p>
+                        <a href="https://www.google.com/search?q={{ urlencode(($order->shipping_provider ?? '') . ' tracking ' . $order->tracking_id) }}"
+                            target="_blank"
+                            class="mt-3 block w-full text-center py-2 bg-violet-600 text-white text-xs font-bold rounded-md hover:bg-violet-700 transition-colors">
+                            Track Order Now
+                        </a>
                     </div>
+                </div>
+                @endif
+
+                @if($order->payment_method)
+                <div class="mt-5 pt-5 border-t border-gray-100">
+                    <p class="text-xs text-gray-400 uppercase tracking-wide font-semibold mb-1">Payment Method</p>
+                    <p class="text-sm text-gray-700 font-medium">{{ $order->payment_method === 'cod' ? 'Cash on Delivery' : ucfirst($order->payment_method) }}</p>
+                </div>
                 @endif
 
                 <div class="mt-5">
                     <a href="{{ route('orders.index') }}"
-                       class="flex items-center justify-center gap-2 w-full border border-gray-200 text-gray-700 py-2.5 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16l-4-4m0 0l4-4m-4 4h18"/></svg>
+                        class="flex items-center justify-center gap-2 w-full border border-gray-200 text-gray-700 py-2.5 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16l-4-4m0 0l4-4m-4 4h18" />
+                        </svg>
                         Back to Orders
                     </a>
                 </div>
