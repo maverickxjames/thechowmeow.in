@@ -354,7 +354,7 @@ function imageManager() {
 
                 imageElement.onload = () => {
                     this.cropperInstance = new Cropper(imageElement, {
-                        aspectRatio: 1,
+                        aspectRatio: NaN,
                         viewMode: 1,
                         autoCropArea: 1,
                         background: false,
@@ -381,8 +381,8 @@ function imageManager() {
             if (!this.cropperInstance) return;
             
             this.cropperInstance.getCroppedCanvas({
-                width: 1200,
-                height: 1200,
+                maxWidth: 2048,
+                maxHeight: 2048,
                 imageSmoothingEnabled: true,
                 imageSmoothingQuality: 'high',
             }).toBlob((blob) => {

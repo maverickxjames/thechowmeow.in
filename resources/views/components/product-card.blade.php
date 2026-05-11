@@ -3,7 +3,7 @@
         <div class="relative aspect-square overflow-hidden bg-gray-50">
             <img src="{{ $product->primary_image_url }}"
                  alt="{{ $product->name }}"
-                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                 class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
                  loading="lazy">
 
             {{-- Badges --}}

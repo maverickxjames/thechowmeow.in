@@ -38,10 +38,10 @@
         {{-- Image Gallery --}}
         <div class="space-y-3">
             {{-- Main image with zoom --}}
-            <div class="zoom-container aspect-square rounded-xl overflow-hidden bg-gray-50 border border-gray-100"
+            <div class="zoom-container aspect-square rounded-xl overflow-hidden bg-white border border-gray-100"
                  @mousemove="zoomMove($event)" @mouseleave="zoomReset($event)">
                 <img :src="selectedImage" alt="{{ $product->name }}"
-                     class="main-img w-full h-full object-cover"
+                     class="main-img w-full h-full object-contain"
                      id="main-image"
                      :style="zoomStyle">
             </div>
